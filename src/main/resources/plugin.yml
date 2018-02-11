@@ -1,0 +1,45 @@
+name: BrohoofEconomy
+author: SweetieBelle
+main: com.brohoof.brohoofeconomy.BrohoofEconomyPlugin
+depend: [Vault]
+version: $version
+load: startup
+description: >
+            Gives economy to servers.
+commands:
+    money:
+      description: Checks balance of you or another player
+      usage: /money <other>
+      permission: brohoofecon.money
+    balance:
+      description: Checks balance of you or another player
+      usage: /balance <other>
+      permission: brohoofecon.money
+    moneytop:
+      description: View the top 10 players
+      usage: /moneytop
+      permission: brohoofecon.moneytop
+    pay:
+      description: Give money to another player from yourself
+      usage: /pay target amount
+      permission: brohoofecon.pay
+    give:
+      description: Give money to another player
+      usage: /give target amount
+      permission: brohoofecon.give
+permissions:
+    brohoofecon.money:
+      description: Allows usage of /money
+      default: true
+    brohoofecon.money.other:
+      description: Allows usage of /money other
+      default: op
+    brohoofecon.give:
+      description: Allows usage of /give
+      default: op
+    brohoofecon.moneytop:
+      description: Allows usage of /moneytop
+      default: true
+    brohoofecon.pay:
+      description: Allows usage of /pay
+      default: true

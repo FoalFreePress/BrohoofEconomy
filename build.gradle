@@ -1,0 +1,38 @@
+plugins {
+	id 'java'
+	id 'eclipse'
+}
+
+group = 'org.sweetiebelle'
+version = '1'
+
+repositories {
+	jcenter()
+	maven {
+		name 'spigot'
+		url 'https://hub.spigotmc.org/nexus/content/groups/public/'
+	}
+	maven {
+		name 'vault-repo'
+		url 'http://nexus.hc.to/content/repositories/pub_releases'
+	}
+}
+
+
+dependencies {
+	compile 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
+	compile 'net.milkbowl.vault:VaultAPI:1.6'
+	compile fileTree(dir: 'libs', include: '*.jar')
+
+}
+
+processResources {
+	inputs.properties version: project.version
+	from (sourceSets.main.resources.srcDirs) {
+		include 'plugin.yml'
+		expand version:project.version
+	}
+	from (sourceSets.main.resources.srcDirs) {
+		exclude 'plugin.yml'
+	}
+}
