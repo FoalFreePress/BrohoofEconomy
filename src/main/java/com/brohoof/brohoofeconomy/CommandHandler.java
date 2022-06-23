@@ -104,15 +104,20 @@ public class CommandHandler {
         if (sourceO.isPresent() && targetO.isPresent()) {
             Account source = sourceO.get();
             Account target = targetO.get();
+            if(cashToSend <= 0.0)
+            {
+                sender.sendMessage(ChatColor.RED + "You can't send negative money!");
+                return;
+            }
             if (source.getCash() >= cashToSend) {
                 source.setCash(source.getCash() - cashToSend);
                 target.setCash(target.getCash() + cashToSend);
                 plugin.getData().saveAccount(source);
                 plugin.getData().saveAccount(target);
-                sender.sendMessage(String.format(ChatColor.DARK_GREEN + "You've sent %10.2f" + plugin.getSettings().curNamePlural + " from " + target.getName(), cashToSend));
+                sender.sendMessage(String.format(ChatColor.DARK_GREEN + "You've sent %10.2f "  + plugin.getSettings().curNamePlural + " from " + target.getName(), cashToSend));
                 Player pTarget = Bukkit.getPlayer(target.getUuid());
                 if (pTarget != null)
-                    pTarget.sendMessage(String.format(ChatColor.DARK_GREEN + "You've recieved %10.2f" + plugin.getSettings().curNamePlural + " from " + target.getName(), cashToSend));
+                    pTarget.sendMessage(String.format(ChatColor.DARK_GREEN + "You've recieved %10.2f " + plugin.getSettings().curNamePlural + " from " + source.getName(), cashToSend));
             } else
                 sender.sendMessage(ChatColor.RED + "You do not have enough cash to send!");
         } else
