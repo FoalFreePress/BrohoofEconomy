@@ -109,10 +109,10 @@ public class CommandHandler {
                 target.setCash(target.getCash() + cashToSend);
                 plugin.getData().saveAccount(source);
                 plugin.getData().saveAccount(target);
-                sender.sendMessage(ChatColor.DARK_GREEN + "You've sent " + cashToSend + " " + plugin.getSettings().curNamePlural + " to " + target.getName());
+                sender.sendMessage(String.format(ChatColor.DARK_GREEN + "You've sent %10.2f" + plugin.getSettings().curNamePlural + " from " + target.getName(), cashToSend));
                 Player pTarget = Bukkit.getPlayer(target.getUuid());
                 if (pTarget != null)
-                    pTarget.sendMessage(ChatColor.DARK_GREEN + "You've recieved " + cashToSend + plugin.getSettings().curNamePlural + " from " + target.getName());
+                    pTarget.sendMessage(String.format(ChatColor.DARK_GREEN + "You've recieved %10.2f" + plugin.getSettings().curNamePlural + " from " + target.getName(), cashToSend));
             } else
                 sender.sendMessage(ChatColor.RED + "You do not have enough cash to send!");
         } else
@@ -123,7 +123,7 @@ public class CommandHandler {
         Optional<Account> acco = plugin.getData().getAccount(target);
         if (acco.isPresent()) {
             Account acc = acco.get();
-            toSend.sendMessage(ChatColor.LIGHT_PURPLE + acc.getName() + ChatColor.RESET + " has " + ChatColor.DARK_GREEN + acc.getCash());
+            toSend.sendMessage(String.format(ChatColor.LIGHT_PURPLE + acc.getName() + ChatColor.RESET + " has " + ChatColor.DARK_GREEN + "%10.2f", acc.getCash()));
         } else
             toSend.sendMessage(ChatColor.RED + "No account by that username found!");
     }
