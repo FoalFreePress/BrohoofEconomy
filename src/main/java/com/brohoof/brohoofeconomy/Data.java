@@ -101,13 +101,13 @@ class Data {
             if (rs.next()) {
                 final String stringuuuid = rs.getString("uuid");
                 if (isNull(stringuuuid))
-                    throw new NoDataException();
+                    throw new NoDataException("Null UUID for username " + name);
                 id = rs.getInt("id");
                 uuid = UUID.fromString(rs.getString("uuid"));
                 name = rs.getString("name");
                 cash = rs.getDouble("cash");
             } else
-                throw new NoDataException();
+                throw new NoDataException("No Account found.");
         } catch (SQLException | IllegalArgumentException | NoDataException e) {
             error(e);
             return Optional.<Account>empty();
@@ -126,13 +126,13 @@ class Data {
             if (rs.next()) {
                 final String stringuuuid = rs.getString("uuid");
                 if (isNull(stringuuuid))
-                    throw new NoDataException();
+                    throw new NoDataException("Null UUID for uuid " + uuid);
                 id = rs.getInt("id");
                 uuid = UUID.fromString(rs.getString("uuid"));
                 name = rs.getString("name");
                 cash = rs.getDouble("cash");
             } else
-                throw new NoDataException();
+                throw new NoDataException("No Account found.");
         } catch (SQLException | IllegalArgumentException | NoDataException e) {
             error(e);
             return Optional.<Account>empty();
@@ -189,7 +189,8 @@ class Data {
             return;
         if (e instanceof NoDataException) {
             // If true, then it was caused by data in Account not being found.
-            if (e.getMessage().equalsIgnoreCase("No Account found."))
+            String message = e.getMessage();
+            if (message != null && message.equals("No Account found."))
                 return;
             logger.severe("NoDataException: " + e.getMessage());
             return;
