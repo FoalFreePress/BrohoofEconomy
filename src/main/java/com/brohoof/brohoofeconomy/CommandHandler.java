@@ -104,6 +104,11 @@ public class CommandHandler {
         if (sourceO.isPresent() && targetO.isPresent()) {
             Account source = sourceO.get();
             Account target = targetO.get();
+            if(source.equals(target))
+            {
+                sender.sendMessage(ChatColor.RED + "You can't send money to yourself!");
+                return;
+            }
             if(cashToSend <= 0.0)
             {
                 sender.sendMessage(ChatColor.RED + "You can't send negative money!");
