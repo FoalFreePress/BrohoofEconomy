@@ -1,8 +1,9 @@
 package com.brohoof.brohoofeconomy;
 
 import org.bukkit.plugin.java.JavaPlugin;
-import org.sweetiebelle.lib.ConnectionManager;
 import org.sweetiebelle.lib.SweetieLib;
+import org.sweetiebelle.lib.connection.ConnectionManager;
+
 import com.brohoof.brohoofeconomy.command.handlers.GiveMoneyCommandHandler;
 import com.brohoof.brohoofeconomy.command.handlers.MoneyCommandHandler;
 import com.brohoof.brohoofeconomy.command.handlers.MoneyTopCommandHandler;
@@ -23,7 +24,7 @@ public class BrohoofEconomyPlugin extends JavaPlugin {
     public void onEnable() {
         ConnectionManager connectionManager = null;
         try {
-            connectionManager = SweetieLib.getConnection();
+            connectionManager = SweetieLib.getPlugin().getConnection();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
