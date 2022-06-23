@@ -23,7 +23,7 @@ commands:
       description: Give money to another player from yourself
       usage: /pay target amount
       permission: brohoofecon.pay
-    give:
+    givemoney:
       description: Give money to another player
       usage: /give target amount
       permission: brohoofecon.give

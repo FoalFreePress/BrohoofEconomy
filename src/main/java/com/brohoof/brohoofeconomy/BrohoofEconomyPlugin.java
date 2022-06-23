@@ -69,7 +69,6 @@ public class BrohoofEconomyPlugin extends JavaPlugin {
         return commandHandler;
     }
 
-    @SuppressWarnings("deprecation")
     public UUID getUUID(String string) {
         Player ply = Bukkit.getPlayer(string);
         if (ply != null)

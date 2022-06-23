@@ -35,6 +35,7 @@ public class CommandHandler {
                         return true;
                     }
                 }
+                return false;
             }
             case "moneytop": {
                 moneyTop(sender);
@@ -56,6 +57,7 @@ public class CommandHandler {
                         return true;
                     }
                 }
+                return false;
             }
             case "pay": {
                 if (args.length < 2)
@@ -63,7 +65,7 @@ public class CommandHandler {
                 pay(sender, sender.getName(), args[0], Double.valueOf(args[1]));
                 return true;
             }
-            case "give": {
+            case "givemoney": {
                 if (args.length < 2)
                     return false;
                 if (!sender.hasPermission("brohoofecon.give"))
