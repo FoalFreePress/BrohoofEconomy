@@ -9,8 +9,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import org.sweetiebelle.lib.connection.ConnectionManager;
-import org.sweetiebelle.lib.exceptions.NoDataException;
+import net.shonx.lib.connection.ConnectionManager;
+import net.shonx.lib.exceptions.NoDataException;
 
 
 /**

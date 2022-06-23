@@ -1,11 +1,11 @@
 name: BrohoofEconomy
 author: SweetieBelle
 main: com.brohoof.brohoofeconomy.BrohoofEconomyPlugin
-version: $version
+version: @VERSION@
 depend: [SweetieLib]
 description: >
             Gives economy to servers.
-api-version: 1.15
+api-version: 1.19
 commands:
     money:
       description: Checks balance of you or another player
