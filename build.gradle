@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'org.sweetiebelle'
-version = '3'
+version = '5'
 
 repositories {
 	jcenter()
@@ -20,9 +20,9 @@ repositories {
 
 
 dependencies {
-	compile 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
-	compile 'net.milkbowl.vault:VaultAPI:1.6'
-	compile fileTree(dir: 'libs', include: '*.jar')
+	implementation 'org.bukkit:bukkit:1.15.2-R0.1-SNAPSHOT'
+	implementation 'net.milkbowl.vault:VaultAPI:1.6'
+	implementation fileTree(dir: 'libs', include: '*.jar')
 
 }
 

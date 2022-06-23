@@ -1,8 +1,6 @@
 package com.brohoof.brohoofeconomy;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,47 +9,35 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import org.sweetiebelle.lib.ConnectionManager;
+import org.sweetiebelle.lib.exceptions.NoDataException;
+
+
 /**
  * This class handles data transfer to and from the SQL server.
  *
  */
-public class Data {
+class Data {
 
-    private Connection connection;
+    private ConnectionManager connection;
     private final Settings s;
     private Logger logger;
 
-    public Data(final BrohoofEconomyPlugin plugin) {
-        s = plugin.getSettings();
+    Data(BrohoofEconomyPlugin plugin, Settings s, ConnectionManager connectionManager) {
+        this.connection = connectionManager;
+        this.s = s;
         logger = plugin.getLogger();
         createTables();
     }
 
     /**
-     * Saves an account, or creates one if it does not exist.
+     * Saves an account
      * 
      * @param acc
      */
-    public void saveAccount(Account acc) {
-        if (acc == null)
-            return;
+    void saveAccount(Account acc) {
         try {
-            if (acc.getId() < 1)
-                // New account
-                try {
-                    PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %splayers (uuid, name, cash) VALUES (?, ?, ?);", s.dbPrefix));
-                    statement.setString(1, acc.getUuid().toString());
-                    statement.setString(2, acc.getName());
-                    statement.setDouble(3, acc.getCash());
-                    statement.executeUpdate();
-                    statement.close();
-                    return;
-                } catch (final SQLException e) {
-                    error(e);
-                    return;
-                }
-            // Old account
-            PreparedStatement statement = connection.prepareStatement(String.format("UPDATE %splayers SET name = ?, cash = ? WHERE uuid = ?;", s.dbPrefix));
+            PreparedStatement statement = connection.getStatement(String.format("UPDATE %splayers SET name = ?, cash = ? WHERE uuid = ?;", s.dbPrefix));
             statement.setString(1, acc.getName());
             statement.setDouble(2, acc.getCash());
             statement.setString(3, acc.getUuid().toString());
@@ -62,8 +48,27 @@ public class Data {
             return;
         }
     }
+    
+    /**
+     * Creates an account
+     * @param acc
+     */
+    void createAccount(Account acc) {
+        try {
+            PreparedStatement statement = connection.getStatement(String.format("INSERT INTO %splayers (uuid, name, cash) VALUES (?, ?, ?);", s.dbPrefix));
+            statement.setString(1, acc.getUuid().toString());
+            statement.setString(2, acc.getName());
+            statement.setDouble(3, acc.getCash());
+            statement.executeUpdate();
+            statement.close();
+            return;
+        } catch (final SQLException e) {
+            error(e);
+            return;
+        }
+    }
 
-    public ArrayList<Account> getAllAccounts() {
+    ArrayList<Account> getAllAccounts() {
         ArrayList<Account> list = new ArrayList<Account>(0);
         try {
             final String query = "SELECT * FROM " + s.dbPrefix + "players";
@@ -79,13 +84,13 @@ public class Data {
                 list.add(new Account(id, uuid, name, cash));
             }
             return list;
-        } catch (SQLException | IllegalArgumentException | NoDataException e) {
+        } catch (Exception e) {
             error(e);
             return list;
         }
     }
 
-    public Optional<Account> getAccount(String name) {
+    Optional<Account> getAccount(String name) {
         int id;
         UUID uuid;
         double cash;
@@ -110,7 +115,7 @@ public class Data {
         return Optional.<Account>of(new Account(id, uuid, name, cash));
     }
 
-    public Optional<Account> getAccount(UUID uuid) {
+    Optional<Account> getAccount(UUID uuid) {
         int id;
         String name;
         double cash;
@@ -169,7 +174,7 @@ public class Data {
      * @param e
      *            Exception
      */
-    public void error(final Throwable e) {
+    private void error(final Throwable e) {
         if (s.stackTraces) {
             e.printStackTrace();
             return;
@@ -212,14 +217,7 @@ public class Data {
      *             if an error occurred
      */
     private int executeQuery(final String query) throws SQLException {
-        if (s.showQuery)
-            logger.info(query);
-        if (connection == null || connection.isClosed()) {
-            final String connect = new String("jdbc:mysql://" + s.dbHost + ":" + s.dbPort + "/" + s.dbDatabase + "?autoReconnect=true&useSSL=false");
-            connection = DriverManager.getConnection(connect, s.dbUser, s.dbPass);
-            logger.info("Connecting to " + s.dbUser + "@" + connect + "...");
-        }
-        return connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE).executeUpdate(query);
+        return connection.executeUpdate(query);
     }
 
     /**
@@ -232,35 +230,9 @@ public class Data {
      *             if an error occurs
      */
     private ResultSet getResultSet(final String query) throws SQLException {
-        if (s.showQuery)
-            logger.info(query);
-        if (connection == null || connection.isClosed()) {
-            final String connect = new String("jdbc:mysql://" + s.dbHost + ":" + s.dbPort + "/" + s.dbDatabase + "?autoReconnect=true&useSSL=false");
-            connection = DriverManager.getConnection(connect, s.dbUser, s.dbPass);
-            logger.info("Connecting to " + s.dbUser + "@" + connect + "...");
-        }
-        return connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE).executeQuery(query);
+        return connection.executeQuery(query);
     }
 
-    /**
-     * Forces a refresh of the connection object
-     */
-    public void forceConnectionRefresh() {
-        try {
-            if (connection == null || connection.isClosed()) {
-                final String connect = new String("jdbc:mysql://" + s.dbHost + ":" + s.dbPort + "/" + s.dbDatabase + "?autoReconnect=true&useSSL=false");
-                connection = DriverManager.getConnection(connect, s.dbUser, s.dbPass);
-                logger.info("Connecting to " + s.dbUser + "@" + connect + "...");
-            } else {
-                connection.close();
-                final String connect = new String("jdbc:mysql://" + s.dbHost + ":" + s.dbPort + "/" + s.dbDatabase + "?autoReconnect=true&useSSL=false");
-                connection = DriverManager.getConnection(connect, s.dbUser, s.dbPass);
-                logger.info("Connecting to " + s.dbUser + "@" + connect + "...");
-            }
-        } catch (final SQLException e) {
-            error(e);
-        }
-    }
 
     /**
      * Checks if a string is "null"
@@ -269,7 +241,7 @@ public class Data {
      *            the string to check
      * @return true if the string is equal to null, the string is empty, the string is "null", or if the string is ",", else false.
      */
-    public boolean isNull(final String string) {
+    private boolean isNull(final String string) {
         if (string == null || string.isEmpty() || string.equalsIgnoreCase("null") || string.equalsIgnoreCase(","))
             return true;
         return false;
@@ -286,11 +258,7 @@ public class Data {
         try {
             return getResultSet("SELECT * FROM " + pTable) != null;
         } catch (final SQLException e) {
-            // Handle both ' and "
-            if (e.getMessage().equalsIgnoreCase("Table '" + s.dbDatabase + "." + pTable + "' doesn't exist") || e.getMessage().equalsIgnoreCase("Table \"" + s.dbDatabase + "." + pTable + "\" doesn't exist"))
-                return false;
-            error(e);
+            return false;
         }
-        return false;
     }
 }

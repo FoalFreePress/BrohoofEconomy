@@ -1,90 +1,48 @@
 package com.brohoof.brohoofeconomy;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.sweetiebelle.lib.ConnectionManager;
+import org.sweetiebelle.lib.SweetieLib;
+import com.brohoof.brohoofeconomy.command.handlers.GiveMoneyCommandHandler;
+import com.brohoof.brohoofeconomy.command.handlers.MoneyCommandHandler;
+import com.brohoof.brohoofeconomy.command.handlers.MoneyTopCommandHandler;
+import com.brohoof.brohoofeconomy.command.handlers.PayCommandHandler;
 
 public class BrohoofEconomyPlugin extends JavaPlugin {
 
     private Settings settings;
     private Data data;
-    private CommandHandler commandHandler;
     private VaultAPI vaultAPI;
     private EventListener listener;
+    private API api;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void onEnable() {
+        ConnectionManager connectionManager = null;
+        try {
+            connectionManager = SweetieLib.getConnection();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         settings = new Settings(this);
-        data = new Data(this);
-        commandHandler = new CommandHandler(this);
-        vaultAPI = new VaultAPI(this);
-        listener = new EventListener(this);
+        data = new Data(this, settings, connectionManager);
+        api = new API(data);
+        vaultAPI = new VaultAPI(this, settings, api);
+        listener = new EventListener(settings, api);
         getServer().getPluginManager().registerEvents(listener, this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        return commandHandler.onCommand(sender, command, label, args);
-    }
-
-    /**
-     * @return the settings
-     */
-    public Settings getSettings() {
-        return settings;
+        getCommand("money").setExecutor(new MoneyCommandHandler(settings, api));
+        getCommand("moneytop").setExecutor(new MoneyTopCommandHandler(settings, api));
+        getCommand("pay").setExecutor(new PayCommandHandler(settings, api));
+        getCommand("givemoney").setExecutor(new GiveMoneyCommandHandler(settings, api));
     }
 
     /**
      * @return the Vault API
      */
-    public VaultAPI getAPI() {
+    public VaultAPI getVaultAPI() {
         return vaultAPI;
-    }
-
-    /**
-     * @return the data
-     */
-    public Data getData() {
-        return data;
-    }
-
-    /**
-     * @return the commandHandler
-     */
-    public CommandHandler getCommandHandler() {
-        return commandHandler;
-    }
-
-    public UUID getUUID(String string) {
-        Player ply = Bukkit.getPlayer(string);
-        if (ply != null)
-            return ply.getUniqueId();
-        Optional<Account> op = data.getAccount(string);
-        if (op.isPresent())
-            return op.get().getUuid();
-        return getMD5Hash(string);
-    }
-
-    public UUID getMD5Hash(String digest) {
-        try {
-            return UUID.nameUUIDFromBytes(MessageDigest.getInstance("MD5").digest(digest.getBytes("UTF-8")));
-        } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-            data.error(e);
-            return null;
-        }
     }
 }

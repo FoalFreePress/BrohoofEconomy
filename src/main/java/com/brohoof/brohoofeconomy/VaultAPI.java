@@ -10,9 +10,13 @@ import net.milkbowl.vault.economy.EconomyResponse;
 public class VaultAPI extends AbstractEconomy {
 
     private BrohoofEconomyPlugin plugin;
+    private API api;
+    private Settings settings;
 
-    public VaultAPI(BrohoofEconomyPlugin brohoofEconomyPlugin) {
+    public VaultAPI(BrohoofEconomyPlugin brohoofEconomyPlugin, Settings settings, API api) {
         plugin = brohoofEconomyPlugin;
+        this.settings = settings;
+        this.api = api;
     }
 
     @Override
@@ -22,7 +26,7 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public String getName() {
-        return "BrohoofEconomy";
+        return plugin.getName();
     }
 
     @Override
@@ -42,17 +46,17 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public String currencyNamePlural() {
-        return plugin.getSettings().curNamePlural;
+        return settings.curNamePlural;
     }
 
     @Override
     public String currencyNameSingular() {
-        return plugin.getSettings().curName;
+        return settings.curName;
     }
 
     @Override
     public boolean hasAccount(String playerName) {
-        return plugin.getData().getAccount(playerName).isPresent();
+        return api.hasAccount(playerName);
     }
 
     @Override
@@ -62,7 +66,7 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public double getBalance(String playerName) {
-        Optional<Account> account = plugin.getData().getAccount(playerName);
+        Optional<Account> account = api.getAccount(playerName);
         if (account.isPresent())
             return account.get().getCash();
         return 0;
@@ -75,7 +79,7 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public boolean has(String playerName, double amount) {
-        Optional<Account> account = plugin.getData().getAccount(playerName);
+        Optional<Account> account = api.getAccount(playerName);
         if (account.isPresent())
             if (account.get().getCash() >= amount)
                 return true;
@@ -89,12 +93,12 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public EconomyResponse withdrawPlayer(String playerName, double amount) {
-        Optional<Account> op = plugin.getData().getAccount(playerName);
+        Optional<Account> op = api.getAccount(playerName);
         if (!op.isPresent())
             return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "That player was no found!");
         Account acc = op.get();
         acc.setCash(acc.getCash() - amount);
-        plugin.getData().saveAccount(acc);
+        api.saveAccount(acc);
         return new EconomyResponse(amount, acc.getCash(), EconomyResponse.ResponseType.SUCCESS, "0");
     }
 
@@ -105,12 +109,12 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public EconomyResponse depositPlayer(String playerName, double amount) {
-        Optional<Account> op = plugin.getData().getAccount(playerName);
+        Optional<Account> op = api.getAccount(playerName);
         if (!op.isPresent())
             return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "That player was no found!");
         Account acc = op.get();
         acc.setCash(acc.getCash() + amount);
-        plugin.getData().saveAccount(acc);
+        api.saveAccount(acc);
         return new EconomyResponse(amount, acc.getCash(), EconomyResponse.ResponseType.SUCCESS, "0");
     }
 
@@ -166,7 +170,7 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public boolean createPlayerAccount(String playerName) {
-        plugin.getData().saveAccount(new Account(0, plugin.getUUID(playerName), playerName, 0.0));
+        api.saveAccount(new Account(0, api.getUUID(playerName), playerName, 0.0));
         return true;
     }
 
